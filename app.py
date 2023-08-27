@@ -61,12 +61,18 @@ if match_button:
     _, _, evaluation = match_employees(PAT, model_id, name, overview, duration, goals, skillset, desired_outcomes)
     #evaluation = test_match_employees()
     positive = []
+    value = []
     for eval in evaluation['evaluation']:
         try:
-            positive.append(sentiment(PAT, (eval))['POSITIVE'] > 0.5)
+            prob = sentiment(PAT, str(eval))['POSITIVE']
+            value.append(prob)
+            positive.append(prob > 0.5)
         except:
+            value.append(0)
             positive.append(False)
+    evaluation['value'] = value
     evaluation['positive'] = positive
+    evaluation = evaluation.sort_values(by='value', ascending=False)
 
     "### Suitable employees"
 
