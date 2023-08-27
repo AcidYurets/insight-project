@@ -1,9 +1,15 @@
 import datetime
 import os
 
+import pandas as pd
 import streamlit as st
+from PIL import Image
 
-from script import match_employees, skills_retrieve, EMP_PATH
+from script import skills_retrieve, EMP_PATH, match_employees
+
+
+def test_match_employees():
+    return pd.DataFrame([["Yury S", "Employee from Russia bla-bla-bla"], ["Andrei P", "Employee from Poland bla-bla-bla"]])
 
 """
 # MatchEmp
@@ -41,10 +47,28 @@ if match_button:
             PAT = None
 
     # Рассчитываем время на выполнение проекта
-    duration = (complete_by - datetime.date.today())
+    duration = str(complete_by - datetime.date.today())
 
-    summary, reasoning, evaluation = match_employees(PAT, name, overview, duration, goals, skillset, desired_outcomes, sign_of_completion)
-    st.write(summary)
-    # st.write(reasoning)
-    # st.write(evaluation)
+    # Формируем строку скиллов
+    skillset = ', '.join(skillset)
+
+    _, _, evaluation = match_employees(PAT, name, overview, duration, goals, skillset, desired_outcomes, sign_of_completion)
+    #evaluation = test_match_employees()
+
+    "### Найденные сотрудники"
+
+    for ind, row in evaluation.iterrows():
+        with st.container():
+            col1, col2 = st.columns([1, 2])
+            with col1:
+                try:
+                    image = Image.open(f"images/{ind}.jpg")
+                except FileNotFoundError:
+                    image = None
+                if image is not None:
+                    st.image(image)
+
+            with col2:
+                st.header(ind)
+                st.write(row[0])
 
