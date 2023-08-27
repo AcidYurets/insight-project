@@ -5,10 +5,9 @@ from langchain.llms import Clarifai
 from langchain import PromptTemplate, LLMChain
 from langchain.chains import SimpleSequentialChain, SequentialChain
 
-CLARIFAI_PAT = 'e5b7191f59214c23ba47f82c50fd6a6f'
-clarifai_llm = Clarifai(pat=CLARIFAI_PAT, user_id='meta', app_id='Llama-2', model_id='llama2-7b-chat')
+def match_employees(pat: str, name: str, overview: str, duration: timedelta, goals: str, desired_outcomes: str, sign_of_completion: str) -> (pd.DataFrame, pd.DataFrame, pd.DataFrame):
+    clarifai_llm = Clarifai(pat=pat, user_id='meta', app_id='Llama-2', model_id='llama2-7b-chat')
 
-def match_employees(name: str, overview: str, duration: timedelta, goals: str, desired_outcomes: str, sign_of_completion: str) -> (pd.DataFrame, pd.DataFrame, pd.DataFrame):
     # Пока pr_sk - такая затычка
     pr_sk = f"{overview}"
 
