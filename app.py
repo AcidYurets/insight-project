@@ -1,6 +1,7 @@
 import datetime
 import os
 
+import pandas as pd
 import streamlit as st
 
 from script import match_employees
@@ -28,21 +29,26 @@ with st.form('Match employees'):
     sign_of_completion = st.text_area('Input project sign of completion', placeholder="""The project will be considered successful when the recommendation engine demonstrates its ability to provide relevant and engaging content suggestions, positively impacting user engagement metrics. The final deliverables should include comprehensive documentation, model code, integration guidelines, and insights gained from A/B testing.
     """)
 
-    if st.form_submit_button('Match employees to this project'):
-        PAT = os.environ.get('CLARIFAI_PAT')
+    match_button = st.form_submit_button('Match employees to this project!')
 
-        if not PAT:  # If PAT is not set via environment variable
-            try:
-                PAT = st.secrets['CLARIFAI_PAT']
-            except KeyError:
-                st.error("Failed to retrieve the Clarifai Personal Access Token!")
-                PAT = None
+if match_button:
+    PAT = os.environ.get('CLARIFAI_PAT')
 
-        # Рассчитываем время на выполнение проекта
-        duration = (complete_by - datetime.date.today())
+    if not PAT:  # If PAT is not set via environment variable
+        try:
+            PAT = st.secrets['CLARIFAI_PAT']
+        except KeyError:
+            st.error("Failed to retrieve the Clarifai Personal Access Token!")
+            PAT = None
 
-        summary, reasoning, evaluation = match_employees(PAT, name, overview, duration, goals, desired_outcomes, sign_of_completion)
-        st.write(summary)
-        # st.write(reasoning)
-        # st.write(evaluation)
+    # Рассчитываем время на выполнение проекта
+    duration = (complete_by - datetime.date.today())
+
+    df = pd.DataFrame(skillset)
+    df
+
+    #summary, reasoning, evaluation = match_employees(PAT, name, overview, duration, goals, desired_outcomes, sign_of_completion)
+    #st.write(summary)
+    # st.write(reasoning)
+    # st.write(evaluation)
 
