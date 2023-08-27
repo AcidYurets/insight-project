@@ -1,7 +1,6 @@
 import datetime
 import os
 
-import pandas as pd
 import streamlit as st
 
 from script import match_employees, skills_retrieve, EMP_PATH

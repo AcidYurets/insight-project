@@ -13,7 +13,7 @@ def skills_retrieve(path):
     return skills
 
 
-def match_employees(pat: str, name: str, overview: str, duration: timedelta, goals: str, skillset: list(str), desired_outcomes: str, sign_of_completion: str) -> (pd.DataFrame, pd.DataFrame, pd.DataFrame):
+def match_employees(pat: str, name: str, overview: str, duration: timedelta, goals: str, skillset: list[str], desired_outcomes: str, sign_of_completion: str) -> (pd.DataFrame, pd.DataFrame, pd.DataFrame):
     clarifai_llm = Clarifai(pat=pat, user_id='meta', app_id='Llama-2', model_id='llama2-7b-chat')
 
     # Пока pr_sk - такая затычка
