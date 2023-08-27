@@ -4,7 +4,7 @@ import os
 import pandas as pd
 import streamlit as st
 
-from script import match_employees
+from script import match_employees, skills_retrieve, EMP_PATH
 
 """
 # MatchEmp
@@ -23,7 +23,7 @@ with st.form('Match employees'):
     4. Boost Platform Retention: Encourage users to spend more time on the platform by consistently delivering compelling and personalized content.
     5. Drive Business Value: Translate improved user engagement into higher viewer retention rates, increased subscriptions, and enhanced brand loyalty.
     """)
-    skillset = st.multiselect('Choose required skills', ['Python', 'Java', 'Go', 'C++', 'R', 'JavaScript', 'C#'])
+    skillset = st.multiselect('Choose required skills', skills_retrieve(EMP_PATH))
     desired_outcomes = st.text_area('Input project desired outcomes', placeholder="""The successful completion of this project will result in a cutting-edge recommendation engine integrated into the online streaming platform. The engine will deliver accurate and personalized content suggestions to users, ultimately enhancing their viewing experience, increasing engagement, and contributing to the platform's business success.
     """)
     sign_of_completion = st.text_area('Input project sign of completion', placeholder="""The project will be considered successful when the recommendation engine demonstrates its ability to provide relevant and engaging content suggestions, positively impacting user engagement metrics. The final deliverables should include comprehensive documentation, model code, integration guidelines, and insights gained from A/B testing.
@@ -44,11 +44,8 @@ if match_button:
     # Рассчитываем время на выполнение проекта
     duration = (complete_by - datetime.date.today())
 
-    df = pd.DataFrame(skillset)
-    df
-
-    #summary, reasoning, evaluation = match_employees(PAT, name, overview, duration, goals, desired_outcomes, sign_of_completion)
-    #st.write(summary)
+    summary, reasoning, evaluation = match_employees(PAT, name, overview, duration, goals, skillset, desired_outcomes, sign_of_completion)
+    st.write(summary)
     # st.write(reasoning)
     # st.write(evaluation)
 
