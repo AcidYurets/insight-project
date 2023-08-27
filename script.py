@@ -6,7 +6,7 @@ from langchain.llms import Clarifai
 from langchain import PromptTemplate, LLMChain
 from langchain.chains import SimpleSequentialChain, SequentialChain
 
-EMP_PATH = "data_hackaton_2.xlsx"
+EMP_PATH = "data_hackaton.xlsx"
 
 import re
 def remove_bracket_content(input_string):
