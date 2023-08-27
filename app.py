@@ -63,7 +63,7 @@ if match_button:
     positive = []
     for eval in evaluation['evaluation']:
         try:
-            positive.append(sentiment(str(eval))['POSITIVE'] > 0.5)
+            positive.append(sentiment(PAT, (eval))['POSITIVE'] > 0.5)
         except:
             positive.append(False)
     evaluation['positive'] = positive
