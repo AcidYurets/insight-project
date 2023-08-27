@@ -5,18 +5,20 @@ import pandas as pd
 import streamlit as st
 from PIL import Image
 
-from script import skills_retrieve, EMP_PATH, match_employees
+from script import skills_retrieve, EMP_PATH, match_employees, sentiment
 
 
 def test_match_employees():
-    return pd.DataFrame([["Yury S", "Employee from Russia bla-bla-bla"], ["Andrei P", "Employee from Poland bla-bla-bla"]])
+    return pd.DataFrame(["Employee from Russia bla-bla-bla", "Employee from Poland bla-bla-bla"], index=["Yury S", "Andrei P"], columns=["evaluation"])
 
 """
-# MatchEmp
+# AI Manager Tool
 
 This app matches employees to the project.
 """
 with st.form('Match employees'):
+    "### Describe your project"
+
     name = st.text_input('Input project name:', placeholder='Personalized Content Recommendation Engine for Online Streaming Platform')
     overview = st.text_area('Input project overview', placeholder="""In this project description, we present the details of an IT-company project focused on leveraging Machine Learning (ML) and Data Science to develop an innovative recommendation engine for an online streaming platform. The project aims to enhance user experience, increase engagement, and optimize content recommendations based on individual preferences.
     """)
@@ -31,14 +33,10 @@ with st.form('Match employees'):
     skillset = st.multiselect('Choose required skills', skills_retrieve(EMP_PATH))
     desired_outcomes = st.text_area('Input project desired outcomes', placeholder="""The successful completion of this project will result in a cutting-edge recommendation engine integrated into the online streaming platform. The engine will deliver accurate and personalized content suggestions to users, ultimately enhancing their viewing experience, increasing engagement, and contributing to the platform's business success.
     """)
-    sign_of_completion = st.text_area('Input project sign of completion', placeholder="""The project will be considered successful when the recommendation engine demonstrates its ability to provide relevant and engaging content suggestions, positively impacting user engagement metrics. The final deliverables should include comprehensive documentation, model code, integration guidelines, and insights gained from A/B testing.
-    """)
-
     match_button = st.form_submit_button('Match employees to this project!')
 
 if match_button:
     PAT = os.environ.get('CLARIFAI_PAT')
-
     if not PAT:  # If PAT is not set via environment variable
         try:
             PAT = st.secrets['CLARIFAI_PAT']
@@ -46,16 +44,31 @@ if match_button:
             st.error("Failed to retrieve the Clarifai Personal Access Token!")
             PAT = None
 
+    model_id = os.environ.get('MODEL_ID')
+    if not model_id:
+        try:
+            model_id = st.secrets['MODEL_ID']
+        except KeyError:
+            st.error("Failed to retrieve model id!")
+            model_id = None
+
     # Рассчитываем время на выполнение проекта
     duration = str(complete_by - datetime.date.today())
 
     # Формируем строку скиллов
     skillset = ', '.join(skillset)
 
-    _, _, evaluation = match_employees(PAT, name, overview, duration, goals, skillset, desired_outcomes, sign_of_completion)
+    _, _, evaluation = match_employees(PAT, model_id, name, overview, duration, goals, skillset, desired_outcomes)
     #evaluation = test_match_employees()
+    positive = []
+    for eval in evaluation['evaluation']:
+        try:
+            positive.append(sentiment(str(eval))['POSITIVE'] > 0.5)
+        except:
+            positive.append(False)
+    evaluation['positive'] = positive
 
-    "### Найденные сотрудники"
+    "### Suitable employees"
 
     for ind, row in evaluation.iterrows():
         with st.container():
@@ -69,6 +82,9 @@ if match_button:
                     st.image(image)
 
             with col2:
-                st.header(ind)
+                if row['positive']:
+                    st.header(f":green[{ind}]")
+                else:
+                    st.header(f":red[{ind}]")
                 st.write(row[0])
 
