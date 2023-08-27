@@ -22,6 +22,7 @@ goals = st.text_area('Input project goals', placeholder="""The primary objective
 4. Boost Platform Retention: Encourage users to spend more time on the platform by consistently delivering compelling and personalized content.
 5. Drive Business Value: Translate improved user engagement into higher viewer retention rates, increased subscriptions, and enhanced brand loyalty.
 """)
+skillset = st.multiselect('Choose required skills', ['Python', 'Java', 'Go', 'C++', 'R', 'JavaScript', 'C#'])
 desired_outcomes = st.text_area('Input project desired outcomes', placeholder="""The successful completion of this project will result in a cutting-edge recommendation engine integrated into the online streaming platform. The engine will deliver accurate and personalized content suggestions to users, ultimately enhancing their viewing experience, increasing engagement, and contributing to the platform's business success.
 """)
 sign_of_completion = st.text_area('Input project sign of completion', placeholder="""The project will be considered successful when the recommendation engine demonstrates its ability to provide relevant and engaging content suggestions, positively impacting user engagement metrics. The final deliverables should include comprehensive documentation, model code, integration guidelines, and insights gained from A/B testing.
@@ -29,7 +30,6 @@ sign_of_completion = st.text_area('Input project sign of completion', placeholde
 
 # Рассчитываем время на выполнение проекта
 duration = (complete_by - datetime.date.today())
-
 
 if st.button('Match employees to this project'):
     PAT = os.environ.get('CLARIFAI_PAT')
