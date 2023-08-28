@@ -7,7 +7,7 @@ from langchain import PromptTemplate, LLMChain
 from langchain.chains import SimpleSequentialChain, SequentialChain
 
 EMP_PATH = "data_hackaton_5.xlsx"
-
+# komment test
 import re
 def remove_bracket_content(input_string):
     pattern = r'\[.*?\]'
