@@ -388,16 +388,16 @@ def sentiment(pat, evaluation):
 #                                                  goals=pr_goals, desired_outcomes=pr_outcome)
 
 # %%
-positive = []
-value = []
-for eval in evaluation['evaluation']:
-    try:
-        prob = sentiment(pat='f3e3f98c5c0e4e2998390ae4ef11e18f', evaluation=str(eval))['POSITIVE']
-        value.append(prob)
-        positive.append(prob > 0.5)
-    except:
-        value.append(0)
-        positive.append(False)
-evaluation['value'] = value
-evaluation['positive'] = positive
-evaluation = evaluation.sort_values(by='value', ascending=False)
+# positive = []
+# value = []
+# for eval in evaluation['evaluation']:
+#     try:
+#         prob = sentiment(pat='f3e3f98c5c0e4e2998390ae4ef11e18f', evaluation=str(eval))['POSITIVE']
+#         value.append(prob)
+#         positive.append(prob > 0.5)
+#     except:
+#         value.append(0)
+#         positive.append(False)
+# evaluation['value'] = value
+# evaluation['positive'] = positive
+# evaluation = evaluation.sort_values(by='value', ascending=False)
