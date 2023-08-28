@@ -6,14 +6,18 @@ from langchain.llms import Clarifai
 from langchain import PromptTemplate, LLMChain
 from langchain.chains import SimpleSequentialChain, SequentialChain
 
-EMP_PATH = "data_hackaton_5.xlsx"
-# komment test
+EMP_PATH = "test data hackaton.xlsx"
+
 import re
+
+
 def remove_bracket_content(input_string):
     pattern = r'\[.*?\]'
     result = re.sub(pattern, '', input_string).strip()
     result = re.sub(r'\s+', ' ', result)
     return result
+    # return input_string
+
 
 def skills_retrieve(path):
     employees = pd.read_excel(path)
@@ -23,9 +27,9 @@ def skills_retrieve(path):
 
 
 def match_employees(pat, model_id, name, overview, duration, goals, skillset, desired_outcomes):
-    clarifai_llm_13 = Clarifai(pat=pat, user_id='meta', app_id='Llama-2', model_id=model_id)
+    clarifai_llm = Clarifai(pat=pat, user_id='meta', app_id='Llama-2', model_id=model_id)
     # clarifai_llm_70 = Clarifai(pat=pat, user_id='meta', app_id='Llama-2', model_id='llama2-70b-chat')
-    # clarifai_llm_7 = Clarifai(pat=pat, user_id='meta', app_id='Llama-2', model_id='llama2-7b-chat')
+    # clarifai_llm_13 = Clarifai(pat=pat, user_id='meta', app_id='Llama-2', model_id='llama2-13b-chat')
 
     template = """<<SYSTEM>> You are a project manager and professional in team building. You can build a team and 
     match employees for a specific project the most efficient way. Also you are able to decompose the project into 
@@ -78,7 +82,7 @@ def match_employees(pat, model_id, name, overview, duration, goals, skillset, de
     """
     prompt = PromptTemplate(template=template, input_variables=['name_input', 'overview_input', 'duration_input',
                                                                 'goals_input', 'skillset_input', 'outcome_input'])
-    llm_chain_1 = LLMChain(prompt=prompt, llm=clarifai_llm_13)
+    llm_chain_1 = LLMChain(prompt=prompt, llm=clarifai_llm)
 
     template_2 = """<<SYSTEM>> You are a project manager and professional in team building. You can build a team and 
     match employees for a specific project the most efficient way. Also you are a professional in understanding what 
@@ -123,7 +127,7 @@ def match_employees(pat, model_id, name, overview, duration, goals, skillset, de
     """
     prompt_2 = PromptTemplate(template=template_2, input_variables=["agent_1_output"])
 
-    llm_chain_2 = LLMChain(prompt=prompt_2, llm=clarifai_llm_13)
+    llm_chain_2 = LLMChain(prompt=prompt_2, llm=clarifai_llm)
     inputs = {'name_input': name, 'overview_input': overview, 'duration_input': duration, 'goals_input': goals,
               'skillset_input': skillset, 'outcome_input': desired_outcomes}
     output_1 = llm_chain_1.run(inputs)
@@ -138,17 +142,10 @@ def match_employees(pat, model_id, name, overview, duration, goals, skillset, de
     template_3 = """<<SYSTEM>> You are a project manager's assistant. Now you are collaborating with the project 
     manager to build a team of professionals for the project. You must use your skills and knowledge to define the 
     main capabilities of employees in the current company. You are able to make a comprehensive summary of each 
-    employee based on his working and educational background. You always follow [OUTPUT STRUCTURE] below. <</SYSTEM>>
+    employee based on his working and educational background. You always follow [OUTPUT EXAMPLE] below. <</SYSTEM>>
 
-    [OUTPUT STRUCTURE]
-    [STRUCTURE FORMAT]
-    [Employee Summary]
-    [Education]
-    [Experience]
-    [In-Company Projects]
-    [Skills and Tools]
-
-    [/STRUCTURE FORMAT] [EXAMPLE] [Employee Summary] A highly qualified professional with a PhD in Computer Science, 
+    [OUTPUT EXAMPLE]
+    [Employee Summary] A highly qualified professional with a PhD in Computer Science, 
     specializing in machine learning and statistical analysis. Possesses extensive experience as a Senior Data Scientist. 
     Notable for contributions to various projects including Customer Segmentation and Sales Forecasting. Holds a 
     significant portfolio on GitHub showcasing work in the field. Proficient in utilizing Python and R for data analysis 
@@ -165,12 +162,12 @@ def match_employees(pat, model_id, name, overview, duration, goals, skillset, de
 
     [Skills and Tools]
     Machine Learning, Statistical Analysis, Python, R
-    [/EXAMPLE]
-    [/OUTPUT STRUCTURE]
+    [/OUTPUT EXAMPLE]
 
     [TASK] Based on the provided [DESCRIPTION] summarise employee portfolio, so that it fully describes the person from 
     the professional point of view. [DESCRIPTION] consists of [Overall employee description] and [Skills]. Tell only 
-    facts. Behave by the principle "less is more". Do not make any conclusions, assessments nor expectations by yourself. 
+    facts. Behave by the principle "less is more". Do not make any conclusions, assessments nor expectations by yourself.
+    The output must follow the [OUTPUT EXAMPLE].
     [/TASK]
 
     [DESCRIPTION] 
@@ -182,7 +179,7 @@ def match_employees(pat, model_id, name, overview, duration, goals, skillset, de
     [/DESCRIPTION]
     """
     prompt_3 = PromptTemplate(template=template_3, input_variables=["description", "skills"])
-    llm_chain_3 = LLMChain(prompt=prompt_3, llm=clarifai_llm_13)
+    llm_chain_3 = LLMChain(prompt=prompt_3, llm=clarifai_llm)
 
     emp_summary = {}
 
@@ -236,13 +233,14 @@ def match_employees(pat, model_id, name, overview, duration, goals, skillset, de
     [/EMPLOYEE SUMMARY]
     """
     prompt_4 = PromptTemplate(template=template_4, input_variables=["output_1", "output_2", "output_3"])
-    llm_chain_4 = LLMChain(prompt=prompt_4, llm=clarifai_llm_13)
+    llm_chain_4 = LLMChain(prompt=prompt_4, llm=clarifai_llm)
     emp_reasoning = {}
     for key in emp_summary:
         output_3 = emp_summary[key]
         inputs = {"output_1": output_1, "output_2": output_2, "output_3": output_3}
         emp_reasoning[key] = llm_chain_4.run(inputs)
     print("4 complete")
+
     # AGENT 5
     template_5 = """<<SYSTEM>> You are a decision-making system, responsible for assigning employees to the project. 
     You can make a final conclusion about a person matching a specified role in the project based on [REPORT]. The 
@@ -253,24 +251,31 @@ def match_employees(pat, model_id, name, overview, duration, goals, skillset, de
     [STRUCTURE FORMAT]
     Plain text
 
-    [/STRUCTURE FORMAT] [EXAMPLE] Based on the provided information in the report, the most suitable role for the given 
+    [/STRUCTURE FORMAT] [POSITIVE EXAMPLE] Based on the provided information in the report, the most suitable role for the given 
     employee appears to be Machine Learning Engineer. This conclusion is based on the employee's extensive experience as 
     a Senior Data Scientist, specialization in machine learning and statistical analysis, and proficiency in Python, 
     a key language for machine learning. The employee's notable contributions to projects involving machine learning 
-    further support their suitability for this role. No specific cons are mentioned based on the provided information.
-    [/EXAMPLE] [/OUTPUT STRUCTURE]
+    further support their suitability for this role. No specific cons are mentioned based on the provided information.[/POSITIVE EXAMPLE]
+    
+    [NEGATIVE EXAMPLE]
+    Considering the information presented in the report, the employee doesn't seem to be a suitable candidate for any 
+    of the required project roles. While the employee holds a position as a Senior Data Scientist, 
+    their specialization in machine learning and statistical analysis, as well as their proficiency in Python, 
+    are not adequately aligned with the specific roles needed for the project. Furthermore, their contributions to 
+    machine learning projects might not sufficiently qualify them for the roles at hand. It's important to carefully 
+    evaluate whether the employee's skills and experience truly match the project's requirements before considering 
+    them for a role. [/NEGATIVE EXAMPLE] [/OUTPUT STRUCTURE]
 
-    [TASK] Decide which role is the most suitable for the given employee based on [REPORT]. If the given employee does 
-    not match none of the mentioned roles, the person is no longer under the consideration process. Use only provided 
-    information, keep your answer short and clear. The report must follow the [OUTPUT STRUCTURE]. Do not include any 
-    annotations tokens such as: [ANSWER],[TASK],[EXAMPLE] and similar.[/TASK]
+    [TASK] Decide which role is the most suitable for the given employee based on [REPORT] below. If the given employee does 
+    not match none of the mentioned roles, clearly describe that the person is not suitable for the project. Use only provided 
+    information, keep your answer short and clear. The report must follow the [OUTPUT STRUCTURE].[/TASK]
 
     [REPORT]
     {output_4}
     [/REPORT]
     """
     prompt_5 = PromptTemplate(template=template_5, input_variables=["output_4"])
-    llm_chain_5 = LLMChain(prompt=prompt_5, llm=clarifai_llm_13)
+    llm_chain_5 = LLMChain(prompt=prompt_5, llm=clarifai_llm)
     emp_evaluation = {}
     for key in emp_reasoning:
         output_4 = emp_summary[key]
@@ -287,6 +292,7 @@ def match_employees(pat, model_id, name, overview, duration, goals, skillset, de
     evaluation_pd.columns = ['evaluation']
 
     return summary_pd, reasoning_pd, evaluation_pd
+
 
 def sentiment(pat, evaluation):
     ######################################################################################################
@@ -349,3 +355,49 @@ def sentiment(pat, evaluation):
     # Uncomment this line to print the full Response JSON
     # print(output)
     return ret
+
+
+# %%
+# pr_name = 'Personalized Content Recommendation Engine for Online Streaming Platform'
+# pr_overview = ('In this project description, we present the details of an IT-company project focused on leveraging '
+#                'Machine Learning (ML) and Data Science to develop an innovative recommendation engine for an online '
+#                'streaming platform. The project aims to enhance user experience, increase engagement, and optimize '
+#                'content recommendations based on individual preferences.')
+# pr_duration = '8 months'
+# pr_goals = '''The primary objective of this IT-company project is to design, build, and deploy a sophisticated
+# recommendation engine that utilizes Machine Learning and Data Science techniques to: Enhance User Engagement: Provide
+# users with tailored content recommendations that match their viewing history, preferences, and behaviors. Improve
+# Content Discovery: Facilitate the discovery of new content by suggesting relevant movies, TV shows, and genres that
+# align with users interests. Optimize Viewing Experience: Increase user satisfaction by reducing the time spent
+# searching for content and improving the relevance of recommendations. Boost Platform Retention: Encourage users to
+# spend more time on the platform by consistently delivering compelling and personalized content. Drive Business Value:
+# Translate improved user engagement into higher viewer retention rates, increased subscriptions, and enhanced brand
+# loyalty.'''
+# pr_skillset = '''Skills: Machine Learning, Data Science, Software Development, UI/UX Design, Project Management,
+# Data Analysis, Backend Development Tools: Machine Learning Libraries (e.g., TensorFlow, PyTorch, scikit-learn),
+# Data Analysis Tools (e.g., Pandas, NumPy), Programming Languages (e.g., Python, Java), Version Control (e.g., Git),
+# Project Management Software, UI/UX Design Tools (e.g., Adobe XD, Sketch), Backend Frameworks (e.g., Django, Flask)'''
+# pr_outcome = '''The successful completion of this project will result in a cutting-edge recommendation engine
+# integrated into the online streaming platform. The engine will deliver accurate and personalized content suggestions
+# to users, ultimately enhancing their viewing experience, increasing engagement, and contributing to the platform's
+# business success.'''
+#
+# summary, reasoning, evaluation = match_employees(model_id="llama2-70b-chat", pat='f3e3f98c5c0e4e2998390ae4ef11e18f',
+#                                                  name=pr_name,
+#                                                  overview=pr_overview, duration=pr_duration, skillset=pr_skillset,
+#                                                  goals=pr_goals, desired_outcomes=pr_outcome)
+
+# %%
+positive = []
+value = []
+for eval in evaluation['evaluation']:
+    try:
+        prob = sentiment(pat='f3e3f98c5c0e4e2998390ae4ef11e18f', evaluation=str(eval))['POSITIVE']
+        value.append(prob)
+        positive.append(prob > 0.5)
+    except:
+        value.append(0)
+        positive.append(False)
+evaluation['value'] = value
+evaluation['positive'] = positive
+evaluation = evaluation.sort_values(by='value', ascending=False)
