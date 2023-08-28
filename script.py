@@ -6,7 +6,7 @@ from langchain.llms import Clarifai
 from langchain import PromptTemplate, LLMChain
 from langchain.chains import SimpleSequentialChain, SequentialChain
 
-EMP_PATH = "test data hackaton.xlsx"
+EMP_PATH = "data_hackaton_5.xlsx"
 
 import re
 
