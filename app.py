@@ -12,7 +12,7 @@ def test_match_employees():
     return pd.DataFrame(["Employee from Russia bla-bla-bla", "Employee from Poland bla-bla-bla"], index=["Yury S", "Andrei P"], columns=["evaluation"])
 
 """
-# AI Manager Tool
+# AI Resource Project Manager
 
 This app matches employees to the project.
 """
